@@ -10,9 +10,6 @@
 
 <script setup>
 import { ref } from 'vue';
-import ChatIcon from '~/components/ChatIcon.vue';
-import ChatHeader from '~/components/ChatHeader.vue';
-import ChatContent from '~/components/ChatContent.vue';
 
 const isChatBoardVisible = ref(false);
 

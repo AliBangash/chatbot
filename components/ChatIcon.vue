@@ -10,9 +10,6 @@
   </div>
 </template>
 
-<script setup>
-</script>
-
 <style scoped>
 #chatIcon {
   position: fixed;

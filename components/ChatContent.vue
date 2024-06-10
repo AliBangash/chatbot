@@ -2,7 +2,7 @@
   <div class="chat-container">
     <ChatHeader @close-chat="handleClose" />
 
-    <div class="chat-content">
+    <div ref="chatContent" class="chat-content">
       <p style="padding: 0 15px; color: #333;">
         Welcome to FocusMed! How can I assist you today?
       </p>
@@ -87,7 +87,6 @@
       <div id="customAnswerContainer">
         <div v-for="customAnswer in customAnswers" :key="customAnswer.id">
           <div :class="getClass(customAnswer.type)">{{ customAnswer.text }}</div>
-
         </div>
       </div>
     </div>
@@ -109,11 +108,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
-import ChatListItem from "~/components/ChatListItem.vue";
-import ChatHeader from "~/components/ChatHeader.vue";
-import ConfirmationModal from "~/components/ConfirmationModal.vue";
-import CallbackForm from "~/components/CallbackForm.vue";
+import { ref, watch, nextTick } from "vue";
 
 function getClass(type) {
   return type === "question"
@@ -159,6 +154,7 @@ const productSubQuestions = [
 ];
 
 const customAnswers = ref([]);
+const chatContent = ref(null);
 
 const answers = {
   "Who We Are?":
@@ -208,13 +204,14 @@ const showAnswer = (question) => {
     selectedQuestion.value = questions.find((q) => q.text === question);
     selectedSubQuestion.value = null;
     selectedProductSubQuestion.value = null;
-    // Hide other answers
+     // Hide other answers
     document
       .querySelectorAll(".customAnswer")
       .forEach((el) => (el.style.display = "none"));
     document
       .querySelectorAll(".thankYouMessage")
       .forEach((el) => (el.style.display = "none"));
+    scrollToBottom();
   }
 };
 
@@ -222,12 +219,13 @@ const showSubAnswer = (subQuestion) => {
   answer.value = answers[subQuestion] || "";
   selectedSubQuestion.value = subQuestions.find((q) => q.text === subQuestion);
   // Hide other answers
-  document
-    .querySelectorAll(".customAnswer")
-    .forEach((el) => (el.style.display = "none"));
-  document
-    .querySelectorAll(".thankYouMessage")
-    .forEach((el) => (el.style.display = "none"));
+    document
+      .querySelectorAll(".customAnswer")
+      .forEach((el) => (el.style.display = "none"));
+    document
+      .querySelectorAll(".thankYouMessage")
+      .forEach((el) => (el.style.display = "none"));
+ scrollToBottom();
 };
 
 const showProductSubAnswer = (productSubQuestion) => {
@@ -238,13 +236,14 @@ const showProductSubAnswer = (productSubQuestion) => {
     selectedProductSubQuestion.value = productSubQuestions.find(
       (q) => q.text === productSubQuestion
     );
-    // Hide other answers
+     // Hide other answers
     document
       .querySelectorAll(".customAnswer")
       .forEach((el) => (el.style.display = "none"));
     document
       .querySelectorAll(".thankYouMessage")
       .forEach((el) => (el.style.display = "none"));
+    scrollToBottom();
   }
 };
 
@@ -315,6 +314,7 @@ const askCustomQuestion = () => {
         });
 
         // Clear the input field
+        scrollToBottom();
       })
       .catch((error) => {
         console.error("There was a problem with the fetch operation:", error);
@@ -369,11 +369,20 @@ const handleClose = () => {
 const closeCallbackForm = () => {
   showCallbackForm.value = false;
 };
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    chatContent.value.scrollTop = chatContent.value.scrollHeight;
+  });
+};
+
+// Watch for changes in the customAnswers array
+watch(customAnswers, scrollToBottom);
 </script>
 
 <style scoped>
 .chat-container {
-   position: relative;
+  position: relative;
   width: 100%;
   height: 100%;
   display: flex;
@@ -560,5 +569,8 @@ button {
 .media-image {
   width: calc(33% - 10px);
   border-radius: 10px;
+}
+.media-image {
+    width: 100%;
 }
 </style>
